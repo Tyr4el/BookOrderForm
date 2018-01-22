@@ -13,8 +13,10 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class App extends JFrame{
 
@@ -53,12 +55,20 @@ public class App extends JFrame{
 
     // Create an ArrayList of Book objects
     ArrayList<Book> bookList = new ArrayList<Book>();
+    // Create an ArrayList of String to use later
+    ArrayList<String> confirmedBooks = new ArrayList<>();
 
     // Create and initialize a Book object for use later
     Book foundBook = new Book("", "", "");
 
+    DecimalFormat df2 = new DecimalFormat(".##");
+
     // Initialize the discount
     double discount = 0;
+
+    double taxRate = 0.06;
+    double taxAmount = 0;
+    double orderTotal = 0;
 
     public App() {
 
@@ -75,7 +85,6 @@ public class App extends JFrame{
                 String[] tokens = line.split(",");
                 Book newBook = new Book(tokens[0], tokens[1], tokens[2]);
                 bookList.add(newBook);
-                System.out.println(line);
             }
         } catch (IOException x) {
             System.err.println(x);
@@ -87,7 +96,7 @@ public class App extends JFrame{
         btnProcess.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                // TODO: Allow multiple orders to be processed
                 // Get the String value of the ID and Qty
                 String bookID = txtBookId.getText();
 
@@ -145,11 +154,67 @@ public class App extends JFrame{
                 btnProcess.setEnabled(false);
             }
         });
+
         btnConfirm.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 txtSubtotal.setText(foundBook.getPrice());
+                btnViewOrder.setEnabled(true);
+                btnFinishOrder.setEnabled(true);
                 JOptionPane.showMessageDialog(null, "Item accepted");
+
+                confirmedBooks.add(txtItemInfo.getText());
+
+
+                btnConfirm.setEnabled(false);
+            }
+        });
+
+        btnViewOrder.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // TODO: Print this as a string and  not an object like in project specs
+                JOptionPane.showMessageDialog(null, confirmedBooks.toString());
+            }
+        });
+
+        btnFinishOrder.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Date today = new Date();
+                SimpleDateFormat date = new SimpleDateFormat("MM/dd/yy hh:mm:ss a z");
+                SimpleDateFormat squishedDate = new SimpleDateFormat("yyMMddhhmmss");
+
+                String dateResult = date.format(today);
+                String squishedDateResult = squishedDate.format(today);
+
+                String output = squishedDateResult + ", " + txtItemInfo.getText();
+                double subtotal = Double.parseDouble(txtSubtotal.getText());
+
+                taxAmount = taxRate * subtotal;
+                orderTotal = taxAmount + subtotal;
+
+                JOptionPane.showMessageDialog(null,
+                        "Date: " + dateResult + "\n\n" +
+                "Number of items: " + orderQty + "\n\n" +
+                "Item#/ID/Title/Price/Qty/Disc %/Subtotal" + "\n\n" +
+                confirmedBooks + "\n\n" +
+                "Order subtotal: " + txtSubtotal.getText() + "\n\n" +
+                "Tax Rate: 6%" + "\n\n" +
+                "Tax Amount: " + df2.format(taxAmount) + "\n\n" +
+                "Order Total: " + df2.format(orderTotal) + "\n\n" +
+                "Thanks for shopping at the Ye Olde Book Shoppe!");
+
+                Path fileName = Paths.get("transactions.txt");
+
+                // Create transactions.txt and write the info line to it
+                // TODO: Make output present the same way as in the project specs with commas separating the fields
+                try (OutputStream out = Files.newOutputStream(fileName);
+                     BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out))) {
+                    writer.append(output);
+                } catch (IOException x) {
+                    System.err.println(x);
+                }
             }
         });
     }
