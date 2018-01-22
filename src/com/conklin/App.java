@@ -87,14 +87,34 @@ public class App extends JFrame{
         btnProcess.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                txtOrderQty.setEditable(false);
+
                 // Get the String value of the ID and Qty
                 String bookID = txtBookId.getText();
+
+                if (txtOrderQty.getText().equals("")) {
+                    JOptionPane.showMessageDialog(null, "Please input an order quantity");
+                    return;
+                } else if (txtBookQty.getText().equals("")) {
+                    JOptionPane.showMessageDialog(null, "Please input a book quantity");
+                    return;
+                } else if (txtBookId.getText().equals("")) {
+                    JOptionPane.showMessageDialog(null, "Please input a book ID");
+                    return;
+                }
+
+                // Validate the txtOrderQty field to verify a number was entered
+                try {
+                    orderQty = Integer.parseInt(txtOrderQty.getText());
+                } catch (NumberFormatException nfe2) {
+                    JOptionPane.showMessageDialog(null, "Invalid entry for order quantity");
+                    return;
+                }
 
                 try {
                     bookQtyInt = Integer.parseInt(txtBookQty.getText());
                 } catch (NumberFormatException nfe1) {
-                    JOptionPane.showMessageDialog(null, "Please input a book order quantity!");
+                    JOptionPane.showMessageDialog(null, "Invalid entry for book quantity");
+                    return;
                 }
 
                 // Calculate the discount based on the number of books ordered
@@ -108,25 +128,19 @@ public class App extends JFrame{
                     discount = 0.20;
                 }
 
-                // Validate the txtOrderQty field to verify a number was entered
-                try {
-                    orderQty = Integer.parseInt(txtOrderQty.getText());
-                } catch (NumberFormatException nfe2) {
-                    JOptionPane.showMessageDialog(null, "Please input an order quantity!");
-                }
-
                 foundBook = getBookById(bookList, bookID);
 
                 // Calculate the percent discount, total price and total price with discount
-                // TODO: If nothing is entered, errors are thrown to the console because these can't execute
                 double percentDiscount = discount * 100;
                 double totalPrice = bookQtyInt * Double.parseDouble(foundBook.getPrice());
-                double totalPriceWithDiscount = totalPrice - (totalPrice * percentDiscount);
+                double totalPriceWithDiscount = totalPrice - (totalPrice * discount);
 
                 // Append the book info, qty ordered and price with discount to the info text field
-                txtItemInfo.setText(foundBook.toString() + " " + bookQtyInt + " " + discount * 100 + "%" + " " +
+                txtItemInfo.setText(foundBook.toString() + " " + bookQtyInt + " " + percentDiscount + "%" + " " +
                         totalPriceWithDiscount);
-                // Set the confirm button to enabled and process button to disabled
+
+                // Set the confirm button to enabled and process button to disabled and disable the order qty field
+                txtOrderQty.setEditable(false);
                 btnConfirm.setEnabled(true);
                 btnProcess.setEnabled(false);
             }
