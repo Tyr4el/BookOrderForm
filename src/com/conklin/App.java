@@ -10,9 +10,7 @@ package com.conklin;
 import javax.swing.*;
 import java.awt.event.*;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,11 +62,12 @@ public class App extends JFrame{
     DecimalFormat df2 = new DecimalFormat(".##");
 
     // Initialize the discount
-    double discount = 0;
+    double discount = 0.0;
 
     double taxRate = 0.06;
-    double taxAmount = 0;
-    double orderTotal = 0;
+    double taxAmount = 0.0;
+    double orderTotal = 0.0;
+    double totalPriceWithDiscount = 0.0;
 
     public App() {
 
@@ -142,11 +141,11 @@ public class App extends JFrame{
                 // Calculate the percent discount, total price and total price with discount
                 double percentDiscount = discount * 100;
                 double totalPrice = bookQtyInt * Double.parseDouble(foundBook.getPrice());
-                double totalPriceWithDiscount = totalPrice - (totalPrice * discount);
+                totalPriceWithDiscount = totalPrice - (totalPrice * discount);
 
                 // Append the book info, qty ordered and price with discount to the info text field
                 txtItemInfo.setText(foundBook.toString() + " " + bookQtyInt + " " + percentDiscount + "%" + " " +
-                        totalPriceWithDiscount);
+                        df2.format(totalPriceWithDiscount));
 
                 // Set the confirm button to enabled and process button to disabled and disable the order qty field
                 txtOrderQty.setEditable(false);
@@ -158,7 +157,7 @@ public class App extends JFrame{
         btnConfirm.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                txtSubtotal.setText(foundBook.getPrice());
+                txtSubtotal.setText(df2.format(totalPriceWithDiscount));
                 btnViewOrder.setEnabled(true);
                 btnFinishOrder.setEnabled(true);
                 JOptionPane.showMessageDialog(null, "Item accepted");
@@ -173,8 +172,14 @@ public class App extends JFrame{
         btnViewOrder.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // TODO: Print this as a string and  not an object like in project specs
-                JOptionPane.showMessageDialog(null, confirmedBooks.toString());
+                String s = "";
+                int count = 0;
+                for (String item : confirmedBooks)
+                {
+                    count++;
+                    s = count + ". " + s + item + "\n";
+                }
+                JOptionPane.showMessageDialog(null, s);
             }
         });
 
@@ -188,17 +193,25 @@ public class App extends JFrame{
                 String dateResult = date.format(today);
                 String squishedDateResult = squishedDate.format(today);
 
-                String output = squishedDateResult + ", " + txtItemInfo.getText();
                 double subtotal = Double.parseDouble(txtSubtotal.getText());
 
                 taxAmount = taxRate * subtotal;
                 orderTotal = taxAmount + subtotal;
 
+                String s = "";
+                int count = 0;
+                for (String item : confirmedBooks)
+                {
+                    count++;
+                    s = count + ". " + s + item + "\n";
+                }
+
+
                 JOptionPane.showMessageDialog(null,
                         "Date: " + dateResult + "\n\n" +
                 "Number of items: " + orderQty + "\n\n" +
                 "Item#/ID/Title/Price/Qty/Disc %/Subtotal" + "\n\n" +
-                confirmedBooks + "\n\n" +
+                s + "\n" +
                 "Order subtotal: " + txtSubtotal.getText() + "\n\n" +
                 "Tax Rate: 6%" + "\n\n" +
                 "Tax Amount: " + df2.format(taxAmount) + "\n\n" +
@@ -208,13 +221,56 @@ public class App extends JFrame{
                 Path fileName = Paths.get("transactions.txt");
 
                 // Create transactions.txt and write the info line to it
-                // TODO: Make output present the same way as in the project specs with commas separating the fields
                 try (OutputStream out = Files.newOutputStream(fileName);
                      BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out))) {
-                    writer.append(output);
+
+                    for (String item : confirmedBooks)
+                    {
+                        writer.append(squishedDateResult + item);
+                    }
+
                 } catch (IOException x) {
                     System.err.println(x);
                 }
+            }
+        });
+
+        btnNewOrder.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Path fileName = Paths.get("transactions.txt");
+
+                orderQty = 0;
+                bookQtyInt = 0;
+                discount = 0;
+                taxAmount = 0;
+                orderTotal = 0;
+                txtSubtotal.setText("");
+                txtOrderQty.setText("");
+                txtItemInfo.setText("");
+                txtBookQty.setText("");
+                txtBookId.setText("");
+                confirmedBooks.clear();
+
+                btnProcess.setEnabled(true);
+                btnConfirm.setEnabled(false);
+                btnFinishOrder.setEnabled(false);
+                btnViewOrder.setEnabled(false);
+
+                txtOrderQty.setEditable(true);
+
+                try {
+                    Files.delete(fileName);
+                } catch (NoSuchFileException x) {
+                    System.err.format("%s: no such" + " file or directory%n", fileName);
+                } catch (DirectoryNotEmptyException a) {
+                    System.err.format("%s not empty%n", fileName);
+                } catch (IOException x) {
+                    // File permission problems are caught here.
+                    System.err.println(x);
+                }
+
+                JOptionPane.showMessageDialog(null, "Cart has been cleared");
             }
         });
     }
