@@ -39,6 +39,25 @@ public class App extends JFrame{
     int orderQty = 0;
     int bookQtyInt = 0;
 
+    // Initialize the discount
+    double discount = 0.0;
+
+    double taxRate = 0.06;
+    double taxAmount = 0.0;
+    double orderTotal = 0.0;
+    double totalPriceWithDiscount = 0.0;
+    String orderNumber = "1"; // This will need to be converted to an int later
+
+    // Create an ArrayList of Book objects
+    ArrayList<Book> bookList = new ArrayList<Book>();
+    // Create an ArrayList of String to use later
+    ArrayList<String> confirmedBooks = new ArrayList<>();
+
+    // Create and initialize a Book object for use later
+    Book foundBook = new Book("", "", "");
+
+    DecimalFormat df2 = new DecimalFormat(".##");
+
     Book getBookById(ArrayList<Book> bookList, String id)
     {
         for (Book b : bookList)
@@ -51,25 +70,23 @@ public class App extends JFrame{
         return null;
     }
 
-    // Create an ArrayList of Book objects
-    ArrayList<Book> bookList = new ArrayList<Book>();
-    // Create an ArrayList of String to use later
-    ArrayList<String> confirmedBooks = new ArrayList<>();
+    public void updateControls() {
+        btnProcess.setText(String.format("Process Item #%s", orderNumber));
+        btnConfirm.setText(String.format("Confirm Item #%s", orderNumber));
+        lblBookId.setText(String.format("Enter Book ID for Item #%s:", orderNumber));
+        lblBookQty.setText(String.format("Enter quantity for Item #%s:", orderNumber));
+        lblItemInfo.setText(String.format("Item #%s info:", orderNumber));
+        lblSubtotal.setText(String.format("Order subtotal for %s items:", Integer.parseInt(orderNumber) - 1));
+    }
 
-    // Create and initialize a Book object for use later
-    Book foundBook = new Book("", "", "");
-
-    DecimalFormat df2 = new DecimalFormat(".##");
-
-    // Initialize the discount
-    double discount = 0.0;
-
-    double taxRate = 0.06;
-    double taxAmount = 0.0;
-    double orderTotal = 0.0;
-    double totalPriceWithDiscount = 0.0;
 
     public App() {
+        btnProcess.setText(String.format("Process Item #%s", orderNumber));
+        btnConfirm.setText(String.format("Confirm Item #%s", orderNumber));
+        lblBookId.setText(String.format("Enter Book ID for Item #%s:", orderNumber));
+        lblBookQty.setText(String.format("Enter quantity for Item #%s:", orderNumber));
+        lblItemInfo.setText(String.format("Item #%s info:", orderNumber));
+        lblSubtotal.setText(String.format("Order subtotal for %s items:", Integer.parseInt(orderNumber) - 1));
 
         // Get the file from the directory
         Path fileName = Paths.get("inventory.txt");
@@ -157,10 +174,23 @@ public class App extends JFrame{
         btnConfirm.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                orderNumber += 1;
                 txtSubtotal.setText(df2.format(totalPriceWithDiscount));
                 btnViewOrder.setEnabled(true);
                 btnFinishOrder.setEnabled(true);
                 JOptionPane.showMessageDialog(null, "Item accepted");
+
+                if (Integer.parseInt(orderNumber) != orderQty) {
+                    btnProcess.setEnabled(true);
+                    txtBookId.setText("");
+                    txtBookQty.setText("");
+                    updateControls();
+                } else if (Integer.parseInt(orderNumber) == orderQty) {
+                    lblBookId.setText("");
+                    lblBookQty.setText("");
+                    btnProcess.setText("Process Item");
+                    btnConfirm.setText("Confirm Item");
+                }
 
                 confirmedBooks.add(txtItemInfo.getText());
 
