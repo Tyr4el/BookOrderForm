@@ -175,7 +175,13 @@ public class App extends JFrame{
         btnConfirm.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                txtSubtotal.setText(df2.format(totalPriceWithDiscount));
+                if (txtSubtotal.getText().equals("")) {
+                    txtSubtotal.setText(df2.format(totalPriceWithDiscount));
+                } else {
+                    double previousSubtotal = Double.parseDouble(txtSubtotal.getText());
+                    double newSubtotal = previousSubtotal + totalPriceWithDiscount;
+                    txtSubtotal.setText(df2.format(newSubtotal));
+                }
                 btnViewOrder.setEnabled(true);
                 btnFinishOrder.setEnabled(true);
                 JOptionPane.showMessageDialog(null, "Item accepted");
@@ -186,9 +192,11 @@ public class App extends JFrame{
                     txtBookQty.setText("");
                     orderNumberInt += 1;
                     updateControls();
-                } else if (orderNumberInt == orderQty) {
+                } else {
                     lblBookId.setText("");
                     lblBookQty.setText("");
+                    txtBookId.setText("");
+                    txtBookQty.setText("");
                     txtBookId.setEditable(false);
                     txtBookQty.setEditable(false);
                     btnProcess.setText("Process Item");
@@ -212,7 +220,7 @@ public class App extends JFrame{
                     count++;
                     s = count + ". " + s + item + "\n";
                 }
-                JOptionPane.showMessageDialog(null, "\n" + s);
+                JOptionPane.showMessageDialog(null, s);
             }
         });
 
@@ -271,6 +279,8 @@ public class App extends JFrame{
         btnNewOrder.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                orderNumberInt = 1;
+                updateControls();
                 Path fileName = Paths.get("transactions.txt");
 
                 orderQty = 0;
@@ -283,6 +293,8 @@ public class App extends JFrame{
                 txtItemInfo.setText("");
                 txtBookQty.setText("");
                 txtBookId.setText("");
+                txtBookQty.setEditable(true);
+                txtBookId.setEditable(true);
                 confirmedBooks.clear();
 
                 btnProcess.setEnabled(true);
