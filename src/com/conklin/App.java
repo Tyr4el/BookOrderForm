@@ -47,6 +47,7 @@ public class App extends JFrame{
     double orderTotal = 0.0;
     double totalPriceWithDiscount = 0.0;
     String orderNumber = "1"; // This will need to be converted to an int later
+    int orderNumberInt = Integer.parseInt(orderNumber);
 
     // Create an ArrayList of Book objects
     ArrayList<Book> bookList = new ArrayList<Book>();
@@ -71,12 +72,12 @@ public class App extends JFrame{
     }
 
     public void updateControls() {
-        btnProcess.setText(String.format("Process Item #%s", orderNumber));
-        btnConfirm.setText(String.format("Confirm Item #%s", orderNumber));
-        lblBookId.setText(String.format("Enter Book ID for Item #%s:", orderNumber));
-        lblBookQty.setText(String.format("Enter quantity for Item #%s:", orderNumber));
-        lblItemInfo.setText(String.format("Item #%s info:", orderNumber));
-        lblSubtotal.setText(String.format("Order subtotal for %s items:", Integer.parseInt(orderNumber) - 1));
+        btnProcess.setText(String.format("Process Item #%d", orderNumberInt));
+        btnConfirm.setText(String.format("Confirm Item #%d", orderNumberInt));
+        lblBookId.setText(String.format("Enter Book ID for Item #%d:", orderNumberInt));
+        lblBookQty.setText(String.format("Enter quantity for Item #%d:", orderNumberInt));
+        lblItemInfo.setText(String.format("Item #%d info:", orderNumberInt));
+        lblSubtotal.setText(String.format("Order subtotal for %d items:", orderNumberInt - 1));
     }
 
 
@@ -174,20 +175,22 @@ public class App extends JFrame{
         btnConfirm.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                orderNumber += 1;
                 txtSubtotal.setText(df2.format(totalPriceWithDiscount));
                 btnViewOrder.setEnabled(true);
                 btnFinishOrder.setEnabled(true);
                 JOptionPane.showMessageDialog(null, "Item accepted");
 
-                if (Integer.parseInt(orderNumber) != orderQty) {
+                if (orderNumberInt != orderQty) {
                     btnProcess.setEnabled(true);
                     txtBookId.setText("");
                     txtBookQty.setText("");
+                    orderNumberInt += 1;
                     updateControls();
-                } else if (Integer.parseInt(orderNumber) == orderQty) {
+                } else if (orderNumberInt == orderQty) {
                     lblBookId.setText("");
                     lblBookQty.setText("");
+                    txtBookId.setEditable(false);
+                    txtBookQty.setEditable(false);
                     btnProcess.setText("Process Item");
                     btnConfirm.setText("Confirm Item");
                 }
@@ -209,7 +212,7 @@ public class App extends JFrame{
                     count++;
                     s = count + ". " + s + item + "\n";
                 }
-                JOptionPane.showMessageDialog(null, s);
+                JOptionPane.showMessageDialog(null, "\n" + s);
             }
         });
 
