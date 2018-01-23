@@ -218,7 +218,7 @@ public class App extends JFrame{
                 for (String item : confirmedBooks)
                 {
                     count++;
-                    s = count + ". " + s + item + "\n";
+                    s += count + ". " + item + "\n";
                 }
                 JOptionPane.showMessageDialog(null, s);
             }
@@ -244,7 +244,7 @@ public class App extends JFrame{
                 for (String item : confirmedBooks)
                 {
                     count++;
-                    s = count + ". " + s + item + "\n";
+                    s += count + ". " + item + "\n";
                 }
 
 
@@ -267,7 +267,7 @@ public class App extends JFrame{
 
                     for (String item : confirmedBooks)
                     {
-                        writer.append(squishedDateResult + item);
+                        writer.append(squishedDateResult + item + "\n");
                     }
 
                 } catch (IOException x) {
@@ -304,6 +304,7 @@ public class App extends JFrame{
 
                 txtOrderQty.setEditable(true);
 
+                /* Debug
                 try {
                     Files.delete(fileName);
                 } catch (NoSuchFileException x) {
@@ -313,7 +314,7 @@ public class App extends JFrame{
                 } catch (IOException x) {
                     // File permission problems are caught here.
                     System.err.println(x);
-                }
+                }*/
 
                 JOptionPane.showMessageDialog(null, "Cart has been cleared");
             }
